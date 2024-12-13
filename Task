@@ -1,0 +1,140 @@
+#!/bin/bash
+
+# sysopctl: A system management utility
+VERSION="v0.1.0"
+
+# Function to display help
+show_help() {
+    cat <<EOF
+sysopctl - A system management utility
+Usage:
+  sysopctl [command] [options]
+Commands:
+  service list         List running services
+  service start NAME   Start a service
+  service stop NAME    Stop a service
+  system load          Display system load
+  disk usage           Show disk usage
+  process monitor      Monitor system processes
+  logs analyze         Analyze system logs
+  backup PATH          Backup specified path
+Options:
+  --help               Show this help message
+  --version            Show version
+EOF
+}
+
+# Function to handle service commands
+service_command() {
+    case "$1" in
+        list)
+            systemctl list-units --type=service
+            ;;
+        start)
+            if [ -z "$2" ]; then
+                echo "Error: Service name is required for start command."
+            else
+                systemctl start "$2" && echo "Service '$2' started successfully."
+            fi
+            ;;
+        stop)
+            if [ -z "$2" ]; then
+                echo "Error: Service name is required for stop command."
+            else
+                systemctl stop "$2" && echo "Service '$2' stopped successfully."
+            fi
+            ;;
+        *)
+            echo "Invalid service command. Use --help for usage."
+            exit 1
+            ;;
+    esac
+}
+
+# Function to handle system commands
+system_command() {
+    case "$1" in
+        load)
+            uptime
+            ;;
+        *)
+            echo "Invalid system command. Use --help for usage."
+            exit 1
+            ;;
+    esac
+}
+
+# Function to handle disk commands
+disk_command() {
+    case "$1" in
+        usage)
+            df -h
+            ;;
+        *)
+            echo "Invalid disk command. Use --help for usage."
+            exit 1
+            ;;
+    esac
+}
+
+# Function to monitor processes
+process_monitor() {
+    top
+}
+
+# Function to analyze logs
+analyze_logs() {
+    journalctl -p 3 -xb
+}
+
+# Function to perform backup
+backup_files() {
+    if [ -z "$1" ]; then
+        echo "Error: Path is required for backup command."
+        exit 1
+    fi
+
+    rsync -av "$1" /backup/ && echo "Backup of '$1' completed successfully."
+}
+
+# Main command parser
+case "$1" in
+    --help)
+        show_help
+        ;;
+    --version)
+        echo "sysopctl $VERSION"
+        ;;
+    service)
+        service_command "$2" "$3"
+        ;;
+    system)
+        system_command "$2"
+        ;;
+    disk)
+        disk_command "$2"
+        ;;
+    process)
+        if [ "$2" = "monitor" ]; then
+            process_monitor
+        else
+            echo "Invalid process command. Use --help for usage."
+            exit 1
+        fi
+        ;;
+    logs)
+        if [ "$2" = "analyze" ]; then
+            analyze_logs
+        else
+            echo "Invalid logs command. Use --help for usage."
+            exit 1
+        fi
+        ;;
+    backup)
+        backup_files "$2"
+        ;;
+    *)
+        echo "Invalid command. Use --help for usage."
+        exit 1
+        ;;
+esac
