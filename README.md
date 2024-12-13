@@ -1,3 +1,5 @@
+
+
 # **sysopctl**
 
 `sysopctl` is a custom system management utility designed to streamline the administration of Linux systems. With a simple command-line interface, it provides essential tools for managing services, monitoring system health, and performing backup operations.
@@ -23,6 +25,54 @@
 - `process monitor`: Displays real-time process activity (equivalent to `top`).
 - `logs analyze`: Summarizes recent critical log entries (uses `journalctl`).
 - `backup <path>`: Creates a backup of the specified directory using `rsync`.
+
+---
+
+## **Code Overview**
+
+The `sysopctl.sh` script is written in Bash and consists of the following key sections:
+
+### **1. Script Header and Version Definition**
+The script starts by defining the version of the tool:
+```bash
+VERSION="v0.1.0"
+```
+
+### **2. Help and Version Handlers**
+The `show_help` function provides a detailed usage guide, and the version is displayed using:
+```bash
+echo "sysopctl $VERSION"
+```
+
+### **3. Command Handling**
+The script uses a `case` statement to parse user commands and arguments. Key commands include:
+- **Service Commands**:
+  - `service_command` handles `list`, `start`, and `stop` operations, interacting with `systemctl`.
+  ```bash
+  systemctl list-units --type=service
+  systemctl start <service-name>
+  systemctl stop <service-name>
+  ```
+- **System Health**:
+  - `system_command` handles `load` using the `uptime` command.
+  - `disk_command` handles `usage` using `df -h`.
+- **Advanced Features**:
+  - `process_monitor` runs `top` for real-time process monitoring.
+  - `analyze_logs` uses `journalctl -p 3 -xb` to fetch recent critical logs.
+  - `backup_files` uses `rsync` for directory backups:
+    ```bash
+    rsync -av <source-path> /backup/
+    ```
+
+### **4. Error Handling**
+Invalid or incomplete commands display an error and guide the user to use `--help` for correct usage:
+```bash
+echo "Invalid command. Use --help for usage."
+exit 1
+```
+
+### **5. Modularity**
+Functions like `show_help`, `service_command`, `system_command`, and others keep the script modular and maintainable.
 
 ---
 
@@ -94,8 +144,4 @@ sysopctl backup /home/user/documents
   - `rsync`
 
 ---
-
-
-
-
 
